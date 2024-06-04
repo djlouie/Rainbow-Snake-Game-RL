@@ -33,8 +33,12 @@ tau = 0.005
 lr = 1e-3
 
 # action space and observation space size
-n_actions = 4
-n_observations = None
+x_window_size = 720
+y_window_size = 480
+x_axis_size = x_window_size / 10
+y_axis_size = y_window_size / 10
+n_actions = 4  # up down left right
+n_observations = (x_axis_size / 10) * (y_axis_size / 10)
 
 # initialize neural networks
 policy_net = DQN(n_observations, n_actions).to(device)
@@ -52,6 +56,12 @@ n_steps = 0
 def epsilon_greedy(n_steps):
     ...
 
-game = Game(100, 100)
+game = Game(x_window_size, y_window_size)
+
+matrix = torch.zeros(x_axis_size, y_axis_size)
+print(game.snake_body)
+for seg in game.snake_body:
+    
+
 while True:
     game.step()
