@@ -211,9 +211,7 @@ for ep in range(n_episodes):
             new_obs = observation(game)
 
         # get new reward
-        if old_score < game.score:
-            reward = 10
-        elif terminated:
+        if terminated:
             reward = -100
         else:
             red = pygame.Color(255, 0, 0)
@@ -234,9 +232,7 @@ for ep in range(n_episodes):
                     else:
                         reward = -0.1
 
-        # print(new_obs)
-
-        # break
+        
 
         # step of optimization
         optimize_model(obs, new_obs, terminated, reward, action)

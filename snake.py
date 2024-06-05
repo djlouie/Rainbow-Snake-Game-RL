@@ -2,6 +2,7 @@
 import pygame
 import time
 import random
+import pygame_capture
 
 
 class Game:
@@ -50,7 +51,8 @@ class Game:
                     ]
 
         # defining snake colors
-        self.snake_colors = [self.red, self.orange, self.yellow, self.green]
+        start_color = random.randint(0,6)
+        self.snake_colors = [self.rainbow[start_color], self.rainbow[(start_color + 1) % 7], self.rainbow[(start_color + 2) % 7], self.rainbow[(start_color + 3) % 7]]
 
         # fruit position
         self.fruit_position = [(random.randrange(1, (self.window_x//10)) * 10, random.randrange(1, (self.window_y//10)) * 10),  # red
@@ -293,8 +295,24 @@ class Game:
         
 
 if __name__ == "__main__":
+
     game = Game()
+
+    # Initialize the recorder
+    recorder = pygame_capture.Recorder(game.game_window, 'output.mp4', 'MJPG')
+
+    # Start recording
+    recorder.start()
+
     while True:
         terminated = game.step()
         if terminated:
-            exit
+            break
+    
+    # Stop recording
+    recorder.stop()
+
+    # Close the recorder
+    recorder.close()
+
+    exit
