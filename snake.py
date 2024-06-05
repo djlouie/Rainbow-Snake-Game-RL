@@ -5,10 +5,13 @@ import random
 
 
 class Game:
-    def __init__(self, x = 720, y = 480):
+    def __init__(self, x = 720, y = 480, episode = 0):
 
         # set snake speed
         self.snake_speed = 15
+
+        # set episode
+        self.episode = episode
  
         # Window size
         self.window_x = x
@@ -30,20 +33,20 @@ class Game:
         pygame.init()
         
         # Initialise game window
-        pygame.display.set_caption('GeeksforGeeks Snakes')
+        pygame.display.set_caption(f'GeeksforGeeks Snakes Episode {self.episode}')
         self.game_window = pygame.display.set_mode((self.window_x, self.window_y))
  
         # FPS (frames per second) controller
         self.fps = pygame.time.Clock()
         
         # defining snake default position
-        self.snake_position = [100, 50]
+        self.snake_position = [100, 240]
         
         # defining first 4 blocks of snake body
-        self.snake_body = [[100, 50],
-                    [90, 50],
-                    [80, 50],
-                    [70, 50]
+        self.snake_body = [[100, 240],
+                    [90, 240],
+                    [80, 240],
+                    [70, 240]
                     ]
 
         # defining snake colors
@@ -74,6 +77,9 @@ class Game:
         
         # initial score
         self.score = 0
+
+        # terminated variable
+        self.terminated = False
  
     # displaying Score function
     def show_score(self, choice, color, font, size):
@@ -115,21 +121,41 @@ class Game:
         pygame.display.flip()
         
         # after 2 seconds we will quit the program
-        time.sleep(2)
+        # time.sleep(0.5)
         
         # deactivating pygame library
         pygame.quit()
         
         # quit the program
-        quit()
+        # quit()
 
     # def handle_events(self):
     #     for event in pygame.event.get():
     #         if event.type == pygame.QUIT:
     #             self.running = False
 
+    def render(self):
+        self.game_window.fill(self.black)
+        
+        for pos, color in zip(self.snake_body, self.snake_colors):
+            pygame.draw.rect(self.game_window, color,
+                            pygame.Rect(pos[0], pos[1], 10, 10))
+        
+        for num, fruit in enumerate(self.fruit_position):
+            pygame.draw.rect(self.game_window, self.rainbow[num % 7], pygame.Rect(
+                fruit[0], fruit[1], 10, 10))
+    
+        # displaying score continuously
+        self.show_score(1, self.white, 'times new roman', 20)
+    
+        # Refresh game screen
+        pygame.display.update()
+    
+        # Frame Per Second /Refresh Rate
+        self.fps.tick(self.snake_speed)
+
     # Main Function
-    # action is a list [a, b, c, d] where one inddex is one and the rest are 0 which correspond to up, down, right left
+    # action is a 0, 1, 2, or 3 which correspond to up, down, right left
     def step(self, action=None):
 
         if action is None:
@@ -144,28 +170,27 @@ class Game:
                         self.change_to = 'LEFT'
                     if event.key == pygame.K_RIGHT:
                         self.change_to = 'RIGHT'
-            
-    
-            # If two keys pressed simultaneously
-            # we don't want snake to move into two 
-            # directions simultaneously
-            if self.change_to == 'UP' and self.direction != 'DOWN':
-                self.direction = 'UP'
-            if self.change_to == 'DOWN' and self.direction != 'UP':
-                self.direction = 'DOWN'
-            if self.change_to == 'LEFT' and self.direction != 'RIGHT':
-                self.direction = 'LEFT'
-            if self.change_to == 'RIGHT' and self.direction != 'LEFT':
-                self.direction = 'RIGHT'
         else:
-            if action[0] == 1:
-                self.direction = 'UP'
-            if action[1] == 1:
-                self.direction = 'DOWN'
-            if action[2] == 1:
-                self.direction = 'LEFT'
-            if action[3] == 1:
-                self.direction = 'RIGHT'
+            if action == 0:
+                self.change_to = 'UP'
+            if action == 1:
+                self.change_to = 'DOWN'
+            if action == 2:
+                self.change_to = 'LEFT'
+            if action == 3:
+                self.change_to = 'RIGHT'
+
+        # If two keys pressed simultaneously
+        # we don't want snake to move into two 
+        # directions simultaneously
+        if self.change_to == 'UP' and self.direction != 'DOWN':
+            self.direction = 'UP'
+        if self.change_to == 'DOWN' and self.direction != 'UP':
+            self.direction = 'DOWN'
+        if self.change_to == 'LEFT' and self.direction != 'RIGHT':
+            self.direction = 'LEFT'
+        if self.change_to == 'RIGHT' and self.direction != 'LEFT':
+            self.direction = 'RIGHT'
 
     
         # Moving the snake
@@ -243,37 +268,33 @@ class Game:
         self.indigo_fruit_spawn = True
         self.violet_fruit_spawn = True
 
-        self.game_window.fill(self.black)
-        
-        for pos, color in zip(self.snake_body, self.snake_colors):
-            pygame.draw.rect(self.game_window, color,
-                            pygame.Rect(pos[0], pos[1], 10, 10))
-        
-        for num, fruit in enumerate(self.fruit_position):
-            pygame.draw.rect(self.game_window, self.rainbow[num % 7], pygame.Rect(
-                fruit[0], fruit[1], 10, 10))
-    
         # Game Over conditions
-        if self.snake_position[0] < 0 or self.snake_position[0] > self.window_x-10:
-            self.game_over()
-        if self.snake_position[1] < 0 or self.snake_position[1] > self.window_y-10:
-            self.game_over()
-    
         # Touching the snake body
         for block in self.snake_body[1:]:
             if self.snake_position[0] == block[0] and self.snake_position[1] == block[1]:
                 self.game_over()
-    
-        # displaying score continuously
-        self.show_score(1, self.white, 'times new roman', 20)
-    
-        # Refresh game screen
-        pygame.display.update()
-    
-        # Frame Per Second /Refresh Rate
-        self.fps.tick(self.snake_speed)
+                self.terminated = True
+                return self.terminated
+        
+        # Out of bounds
+        if self.snake_position[0] < 0 or self.snake_position[0] > self.window_x-10:
+            self.game_over()
+            self.terminated = True
+            return self.terminated
+        if self.snake_position[1] < 0 or self.snake_position[1] > self.window_y-10:
+            self.game_over()
+            self.terminated = True
+            return self.terminated
+        
+        self.render()
+
+        return self.terminated
+
+        
 
 if __name__ == "__main__":
     game = Game()
     while True:
-        game.step()
+        terminated = game.step()
+        if terminated:
+            exit
