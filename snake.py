@@ -2,7 +2,6 @@
 import pygame
 import time
 import random
-import pygame_capture
 
 
 class Game:
@@ -297,22 +296,8 @@ class Game:
 if __name__ == "__main__":
 
     game = Game()
-
-    # Initialize the recorder
-    recorder = pygame_capture.Recorder(game.game_window, 'output.mp4', 'MJPG')
-
-    # Start recording
-    recorder.start()
-
     while True:
         terminated = game.step()
         if terminated:
             break
-    
-    # Stop recording
-    recorder.stop()
-
-    # Close the recorder
-    recorder.close()
-
     exit
